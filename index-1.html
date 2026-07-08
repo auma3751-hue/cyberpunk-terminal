@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cyberpunk Terminal</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:monospace;color:#39ff14}
+#matrix{position:fixed;inset:0}
+#term{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+width:min(90vw,900px);height:60vh;border:2px solid #39ff14;
+box-shadow:0 0 20px #39ff14;padding:16px;background:rgba(0,0,0,.75)}
+#out{height:calc(100% - 32px);overflow:auto;white-space:pre-wrap}
+#in{width:100%;background:transparent;border:none;outline:none;color:#39ff14;font:inherit}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div id="term">
+<div id="out">CYBERPUNK TERMINAL
+
+Type: help
+</div>
+<input id="in" autofocus placeholder="Type command...">
+</div>
+<script>
+const out=document.getElementById('out'),input=document.getElementById('in');
+const cmds={
+help:"Commands: help, about, date, time, clear",
+about:"Demo Cyberpunk Terminal",
+date:new Date().toLocaleDateString(),
+time:()=>new Date().toLocaleTimeString()
+};
+input.addEventListener('keydown',e=>{
+ if(e.key==="Enter"){
+ let c=input.value.trim().toLowerCase();
+ out.innerHTML+="\n> "+c+"\n";
+ if(c==="clear") out.innerHTML="";
+ else{
+ let r=cmds[c];
+ out.innerHTML+= typeof r==="function"?r():(r||"Command not found");
+ }
+ out.scrollTop=out.scrollHeight;
+ input.value="";
+ }
+});
+const cv=document.getElementById("matrix"),ctx=cv.getContext("2d");
+function rs(){cv.width=innerWidth;cv.height=innerHeight} rs(); onresize=rs;
+const letters="01ABCDEFGHIJKLMNOPQRSTUVWXYZ"; const fs=16;
+let cols,drop;
+function init(){cols=Math.floor(cv.width/fs);drop=Array(cols).fill(1)} init(); onresize=()=>{rs();init();}
+function draw(){
+ctx.fillStyle="rgba(0,0,0,.08)";ctx.fillRect(0,0,cv.width,cv.height);
+ctx.fillStyle="#0f0";ctx.font=fs+"px monospace";
+for(let i=0;i<drop.length;i++){
+ let t=letters[Math.floor(Math.random()*letters.length)];
+ ctx.fillText(t,i*fs,drop[i]*fs);
+ if(drop[i]*fs>cv.height&&Math.random()>0.975)drop[i]=0;
+ drop[i]++;
+}
+requestAnimationFrame(draw)}
+draw();
+</script>
+</body>
+</html>
